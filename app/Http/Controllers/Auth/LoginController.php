@@ -22,59 +22,62 @@ class LoginController extends Controller
             'username' => 'required|string',
             'password' => 'required|string',
         ]);
-    
+
         $credentials = $request->only('username', 'password');
-    
+
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
-    
+
             if ($user->two_factor_auth && $user->gpg_key_verified && !empty($user->gpg_key_fingerprint)) {
                 $gpg = new \Crypt_GPG(['homedir' => storage_path('app/.gnupg')]);
                 $gpg->addEncryptKey($user->gpg_key_fingerprint);
-    
+
                 $verificationCode = bin2hex(random_bytes(10));
-                $encryptedCode = $gpg->encrypt($verificationCode, true);
-    
-                session(['2fa_code' => $verificationCode, 'auth_user_id' => $user->id]);
-    
-                Auth::logout();
-                return view('auth.two_factor', compact('encryptedCode'));
-            } else {
-                // Handle the situation where fingerprint is not available
-                return back()->withErrors(['error' => 'GPG fingerprint not available.']);
-            }
-    
-            return redirect()->intended('home');
+                try {
+                    $encryptedCode = $gpg->encrypt($verificationCode, true);
+                    session([
+                        '2fa_code' => $verificationCode,
+                        'auth_user_id' => $user->id,
+                        'encryptedCode' => $encryptedCode  // Make sure to pass this to the session
+                    ]);
+
+                    Auth::logout(); // Ensures the user must complete 2FA before being fully logged in
+                    return view('auth.two_factor', compact('encryptedCode'));
+                } catch (\Exception $e) {
+                    \Log::error('Failed to encrypt the verification code: ' . $e->getMessage());
+                    return back()->withErrors(['error' => 'Failed to encrypt the verification code. Please try again.']);
+                }
+            } 
+
+            // If 2FA is not enabled or necessary, direct to intended page
+            return redirect()->intended('/');
         }
-    
+
         return back()->withErrors(['username' => 'The provided credentials do not match our records.']);
     }
-    
-    
 
     public function logout(Request $request)
     {
         Auth::logout();
-
-        return redirect()->route('home');
+        return redirect()->route('home'); 
     }
+
     public function verifyTwoFactor(Request $request)
-{
-    $request->validate([
-        'verification_code' => 'required|string',
-    ]);
+    {
+        $request->validate([
+            'verification_code' => 'required|string',
+        ]);
 
-    $expectedCode = session('2fa_code');
-    $userId = session('auth_user_id');
+        $expectedCode = session('2fa_code');
+        $userId = session('auth_user_id');
 
-    if ($request->verification_code === $expectedCode && $userId) {
-        Auth::loginUsingId($userId);
-        session()->forget(['2fa_code', 'auth_user_id']);
+        if ($request->verification_code === $expectedCode && $userId) {
+            Auth::loginUsingId($userId);
+            session()->forget(['2fa_code', 'auth_user_id', 'encryptedCode']);  // Also forget the encryptedCode
 
-        return redirect()->intended('home');
+            return redirect()->intended('/');
+        }
+
+        return back()->withErrors(['verification_code' => 'Invalid verification code.']);
     }
-
-    return back()->withErrors(['verification_code' => 'Invalid verification code.']);
-}
-
 }
