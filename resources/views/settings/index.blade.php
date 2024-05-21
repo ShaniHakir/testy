@@ -1,3 +1,5 @@
+<!-- resources/views/settings/index.blade.php -->
+
 @extends('layouts.app')
 
 @section('title', 'Settings')
@@ -12,13 +14,18 @@
             <a class="nav-link" href="{{ route('settings.pin') }}">PIN Change</a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" href="{{ route('settings.gpg') }}">GPG</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" href="{{ route('settings.jabber') }}">Jabber</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="{{ route('settings.about') }}">About</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ route('settings.gpg') }}">GPG</a>
-        </li>
+        @if (auth()->user()->role !== 'vendor')
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('vendor.upgrade') }}">Upgrade to Vendor</a>
+            </li>
+        @endif
     </ul>
 @endsection

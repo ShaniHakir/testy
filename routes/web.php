@@ -7,7 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\GpgController;
 use App\Http\Controllers\WalletController;
-
+use App\Http\Controllers\VendorController;
 
 // Home Route
 Route::get('/', function () {
@@ -51,3 +51,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
 
 });
+
+
+// Vendor upgrade routes
+Route::get('/settings/confirm-vendor-upgrade', [VendorController::class, 'showUpgradeConfirmation'])->name('vendor.upgrade');
+Route::post('/settings/upgrade-to-vendor', [VendorController::class, 'upgradeToVendor'])->name('vendor.upgrade.confirm');
