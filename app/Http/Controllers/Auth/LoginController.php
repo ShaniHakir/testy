@@ -42,6 +42,7 @@ class LoginController extends Controller
                     ]);
 
                     Auth::logout(); 
+
                     return view('auth.two_factor', compact('encryptedCode'));
                 } catch (\Exception $e) {
                     \Log::error('Failed to encrypt the verification code: ' . $e->getMessage());
@@ -75,9 +76,11 @@ class LoginController extends Controller
             Auth::loginUsingId($userId);
             session()->forget(['2fa_code', 'auth_user_id', 'encryptedCode']);  
 
+
             return redirect()->intended('/');
         }
 
         return back()->withErrors(['verification_code' => 'Invalid verification code.']);
     }
 }
+
