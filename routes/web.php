@@ -6,6 +6,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\GpgController;
+use App\Http\Controllers\WalletController;
+
 
 // Home Route
 Route::get('/', function () {
@@ -43,3 +45,9 @@ Route::post('/settings/gpg/verify', [GpgController::class, 'checkVerification'])
 Route::delete('/settings/gpg', [GpgController::class, 'delete'])->name('gpg.delete');
 Route::post('/settings/gpg/toggle2fa', [GpgController::class, 'toggle2fa'])->name('gpg.toggle2fa');
 Route::post('/two_factor/verify', [App\Http\Controllers\Auth\LoginController::class, 'verifyTwoFactor'])->name('two_factor.verify');
+
+//Wallets
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
+
+});

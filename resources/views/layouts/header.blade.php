@@ -9,12 +9,15 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('home') }}">Home</a>
                 </li>
-                @if (auth()->check())
+                @auth
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('profile') }}">Profile</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('settings') }}">Settings</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('wallet.index') }}">Wallet (BTC: {{ auth()->user()->wallet->balance_btc ?? '0.00' }})</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
@@ -29,7 +32,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('register') }}">Register</a>
                     </li>
-                @endif
+                @endauth
             </ul>
         </div>
     </div>
