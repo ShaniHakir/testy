@@ -30,13 +30,21 @@ class RegisterController extends Controller
     public function register(Request $request)
     {
         $this->validator($request->all())->validate();
-
+    
         $user = $this->create($request->all());
-
+    
+        // Create the wallet for the new user before redirecting
+        $user->wallet()->create([
+            'balance_btc' => 0.0, // Initialize with default balance if required
+        ]);
+    
+        // Log the user in
         auth()->login($user);
-
+    
+        // Redirect to the home route
         return redirect()->route('home');
     }
+    
 
     protected function validator(array $data)
     {
