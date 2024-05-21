@@ -6,4 +6,5 @@
     <h2>Profile</h2>
     <p><strong>Username:</strong> {{ $user->username }}</p>
     <p><strong>About:</strong> {{ $user->about }}</p>
+    <p><strong>User Role:</strong> {{ ucfirst($user->role) }}</p>
 @endsection
