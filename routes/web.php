@@ -9,11 +9,6 @@ use App\Http\Controllers\GpgController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\VendorController;
 
-// Home Route
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
-
 // Registration Routes
 Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('register', [RegisterController::class, 'register']);
@@ -22,6 +17,15 @@ Route::post('register', [RegisterController::class, 'register']);
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('login', [LoginController::class, 'login']);
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+
+
+Route::group(['middleware' => ['auth']], function () {
+
+
+// Home Route
+Route::get('/', function () {
+    return view('welcome');
+})->name('home');
 
 // Profile Route
 Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
@@ -45,14 +49,16 @@ Route::post('/settings/gpg/verify', [GpgController::class, 'checkVerification'])
 Route::delete('/settings/gpg', [GpgController::class, 'delete'])->name('gpg.delete');
 Route::post('/settings/gpg/toggle2fa', [GpgController::class, 'toggle2fa'])->name('gpg.toggle2fa');
 Route::post('/two_factor/verify', [App\Http\Controllers\Auth\LoginController::class, 'verifyTwoFactor'])->name('two_factor.verify');
+});
 
 //Wallets
 Route::group(['middleware' => ['auth']], function () {
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
 
-});
-
-
 // Vendor upgrade routes
 Route::get('/settings/confirm-vendor-upgrade', [VendorController::class, 'showUpgradeConfirmation'])->name('vendor.upgrade');
 Route::post('/settings/upgrade-to-vendor', [VendorController::class, 'upgradeToVendor'])->name('vendor.upgrade.confirm');
+
+});
+
+
