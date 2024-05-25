@@ -77,10 +77,9 @@ class LoginController extends Controller
             session()->forget(['2fa_code', 'auth_user_id', 'encryptedCode']);  
 
 
-            return redirect()->intended('/');
+            return redirect()->intended('/profile');
         }
 
         return back()->withErrors(['verification_code' => 'Invalid verification code.']);
     }
 }
-

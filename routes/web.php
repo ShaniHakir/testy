@@ -19,7 +19,6 @@ Route::post('login', [LoginController::class, 'login']);
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
 
-Route::group(['middleware' => ['auth']], function () {
 
 
 // Home Route
@@ -49,7 +48,7 @@ Route::post('/settings/gpg/verify', [GpgController::class, 'checkVerification'])
 Route::delete('/settings/gpg', [GpgController::class, 'delete'])->name('gpg.delete');
 Route::post('/settings/gpg/toggle2fa', [GpgController::class, 'toggle2fa'])->name('gpg.toggle2fa');
 Route::post('/two_factor/verify', [App\Http\Controllers\Auth\LoginController::class, 'verifyTwoFactor'])->name('two_factor.verify');
-});
+
 
 //Wallets
 Route::group(['middleware' => ['auth']], function () {
