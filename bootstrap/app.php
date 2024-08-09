@@ -11,7 +11,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        // Remove the line that was causing the error
+        // $middleware->append([\App\Http\Middleware\EnsureTokenIsValid::class]);
+
+        // Keep the AdminMiddleware
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'vendor.admin' => \App\Http\Middleware\VendorAdminMiddleware::class,
+            'product.owner' => \App\Http\Middleware\CheckProductOwnership::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

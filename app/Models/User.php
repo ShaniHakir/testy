@@ -64,4 +64,24 @@ class User extends Authenticatable
     {
         return $this->hasOne(Wallet::class);
     }
+
+    /**
+     * Check if the user is a vendor.
+     *
+     * @return bool
+     */
+    public function isVendor()
+    {
+        return $this->role === 'vendor';
+    }
+
+    /**
+     * Check if the user is an admin.
+     *
+     * @return bool
+     */
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
 }

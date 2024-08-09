@@ -10,7 +10,9 @@ class SettingsController extends Controller
 {
     public function index()
     {
-        return view('settings.index');
+        $user = Auth::user();
+        $isVendorOrAdmin = $user->isVendor() || $user->isAdmin();
+        return view('settings.index', compact('isVendorOrAdmin'));
     }
 
     public function password()

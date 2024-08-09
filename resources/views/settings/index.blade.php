@@ -22,6 +22,11 @@
         <li class="nav-item">
             <a class="nav-link" href="{{ route('settings.about') }}">About</a>
         </li>
+        @if ($isVendorOrAdmin)
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('products.index') }}">Manage Products</a>
+            </li>
+        @endif
         @if (auth()->user()->role !== 'vendor')
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('vendor.upgrade') }}">Upgrade to Vendor</a>
