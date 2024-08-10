@@ -15,8 +15,8 @@
         @foreach($products as $product)
             <div class="col-md-4 mb-4">
                 <div class="card">
-                    @if($product->images->where('is_default', true)->first())
-                        <img src="{{ Storage::url($product->images->where('is_default', true)->first()->path) }}" class="card-img-top" alt="{{ $product->name }}">
+                    @if($product->default_image)
+                        <img src="{{ Storage::url($product->default_image->path) }}" class="card-img-top" alt="{{ $product->name }}">
                     @endif
                     <div class="card-body">
                         <h5 class="card-title">{{ $product->name }}</h5>

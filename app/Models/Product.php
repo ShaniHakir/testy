@@ -33,4 +33,9 @@ class Product extends Model
     {
         return $this->hasMany(ProductImage::class);
     }
+
+    public function getDefaultImage()
+    {
+        return $this->images()->where('is_default', true)->first();
+    }
 }

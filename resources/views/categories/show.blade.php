@@ -38,8 +38,8 @@
                 @foreach($products as $product)
                     <div class="col-md-4 mb-4">
                         <div class="card">
-                            @if($product->images->isNotEmpty())
-                                <img src="{{ asset('storage/' . $product->images->first()->image_path) }}" class="card-img-top" alt="{{ $product->name }}">
+                            @if($product->default_image)
+                                <img src="{{ Storage::url($product->default_image->path) }}" class="card-img-top" alt="{{ $product->name }}">
                             @endif
                             <div class="card-body">
                                 <h5 class="card-title">{{ $product->name }}</h5>

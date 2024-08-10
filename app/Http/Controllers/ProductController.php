@@ -8,8 +8,9 @@ use App\Models\ProductImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-
 
 
 class ProductController extends Controller
@@ -19,7 +20,10 @@ class ProductController extends Controller
 
     public function index()
     {
-        $products = Product::with('category', 'user')->paginate(10);
+        $products = Product::with('category', 'user', 'images')->paginate(10);
+        $products->each(function ($product) {
+            $product->default_image = $product->getDefaultImage();
+        });
         return view('products.index', compact('products'));
     }
 
@@ -65,6 +69,8 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
+        $product->load('images');
+        $product->default_image = $product->getDefaultImage();
         return view('products.show', compact('product'));
     }
 
@@ -75,14 +81,20 @@ class ProductController extends Controller
         return view('products.edit', compact('product', 'categories'));
     }
 
-    public function setDefaultImage(Product $product, ProductImage $image)
+    public function setDefaultImage(Request $request, Product $product, ProductImage $image)
     {
         $this->authorize('update', $product);
-    
-        $product->images()->update(['is_default' => false]);
-        $image->update(['is_default' => true]);
-    
-        return back()->with('success', 'Default image updated successfully.');
+
+        try {
+            DB::transaction(function () use ($product, $image) {
+                $product->images()->update(['is_default' => false]);
+                $image->update(['is_default' => true]);
+            });
+
+            return redirect()->route('products.edit', $product)->with('success', 'Default image updated successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('products.edit', $product)->with('error', 'Failed to update default image. Please try again.');
+        }
     }
 
     public function deleteImage(ProductImage $productImage)

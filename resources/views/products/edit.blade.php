@@ -69,9 +69,12 @@
             @enderror
         </div>
         
-        @if($product->images->count() > 0)
-    <div class="form-group">
-        <label>Current Images</label>
+        <button type="submit" class="btn btn-primary">Update Product</button>
+        </form>
+
+    @if($product->images->count() > 0)
+    <div class="mt-4">
+        <h2>Product Images</h2>
         <div class="row">
             @foreach($product->images as $image)
                 <div class="col-md-3 mb-3">
@@ -80,7 +83,6 @@
                         @can('update', $product)
                             <form action="{{ route('products.images.setDefault', ['product' => $product->id, 'image' => $image->id]) }}" method="POST" class="d-inline">
                                 @csrf
-                                @method('PATCH')
                                 <button type="submit" class="btn btn-sm btn-primary" {{ $image->is_default ? 'disabled' : '' }}>
                                     {{ $image->is_default ? 'Default' : 'Set as Default' }}
                                 </button>
@@ -98,9 +100,6 @@
             @endforeach
         </div>
     </div>
-@endif
-        
-        <button type="submit" class="btn btn-primary">Update Product</button>
-    </form>
+    @endif
 </div>
 @endsection

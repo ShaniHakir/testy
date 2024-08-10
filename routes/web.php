@@ -56,9 +56,9 @@ Route::middleware(['auth', 'vendor.admin'])->group(function () {
     Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
     Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
-    Route::match(['post', 'patch'], '/products/{product}/images/{image}/set-default', [ProductController::class, 'setDefaultImage'])->name('products.images.setDefault');
+    Route::post('/products/{product}/images/{image}/set-default', [ProductController::class, 'setDefaultImage'])
+        ->name('products.images.setDefault');
     Route::delete('/products/images/{productImage}', [ProductController::class, 'deleteImage'])->name('products.images.delete');
-
 });
 
 Route::middleware(['auth'])->group(function () {
