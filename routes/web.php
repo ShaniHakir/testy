@@ -14,10 +14,15 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Middleware\VendorAdminMiddleware;
 use App\Models\ProductImage;
+use App\Http\Controllers\Admin\AdminUserController;
+
 
 
 Route::group(['middleware' => ['auth', 'admin'], 'prefix' => 'admin', 'as' => 'admin.'], function () {
     Route::resource('categories', AdminCategoryController::class);
+    Route::resource('users', AdminUserController::class);
+    Route::post('users/{user}/ban', [AdminUserController::class, 'ban'])->name('users.ban');
+    Route::post('users/{user}/unban', [AdminUserController::class, 'unban'])->name('users.unban');
 });
 
 // Registration Routes

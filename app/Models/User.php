@@ -23,6 +23,8 @@ class User extends Authenticatable
         'jabber_xmpp',
         'role',
         'about',
+        'is_banned',
+
     ];
 
     /**

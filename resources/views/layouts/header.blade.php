@@ -16,6 +16,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('admin.categories.index') }}">Categories</a>
                     </li>
+                    @if(auth()->user()->isAdmin())
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('admin.users.index') }}">Users</a>
+                        </li>
+                    @endif
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('settings') }}">Settings</a>
                     </li>
