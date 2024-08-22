@@ -11,14 +11,15 @@ class MessagesController extends Controller
 {
     public function index()
     {
-        $messages = Auth::user()->receivedMessages()->with('sender')->get();
-        return view('messages.index', compact('messages'));
+        $messages = Auth::user()->receivedMessages()->with('sender')->latest()->get();
+        $unreadCount = Auth::user()->receivedMessages()->unread()->count();
+        return view('messages.index', compact('messages', 'unreadCount'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        $users = User::where('id', '!=', Auth::id())->get();
-        return view('messages.create', compact('users'));
+        $recipient = $request->query('recipient');
+        return view('messages.create', compact('recipient'));
     }
 
     public function store(Request $request)
@@ -39,6 +40,11 @@ class MessagesController extends Controller
             $recipient = User::where('username', $request->username)->firstOrFail();
         }
 
+        // Check if the recipient is the same as the sender
+        if ($recipient->id === Auth::id()) {
+            return redirect()->back()->with('error', 'You cannot send a message to yourself.')->withInput();
+        }
+
         Message::create([
             'sender_id' => Auth::id(),
             'recipient_id' => $recipient->id,
@@ -53,10 +59,18 @@ class MessagesController extends Controller
         if ($message->recipient_id !== Auth::id()) {
             abort(403);
         }
-
-        $message->update(['read' => true]);
-
+    
+        if (!$message->read) {
+            $message->update(['read' => true]);
+        }
+    
         return view('messages.show', compact('message'));
+    }
+
+    public function markAllAsRead()
+    {
+        Auth::user()->receivedMessages()->unread()->update(['read' => true]);
+        return redirect()->route('messages.index')->with('success', 'All messages marked as read.');
     }
 
     public function destroy(Message $message)
@@ -71,6 +85,6 @@ class MessagesController extends Controller
     public function deleteAll()
     {
         Auth::user()->receivedMessages()->delete();
-        return redirect()->route('messages.index')->with('success', 'All messages deleted successfully.');
+        return redirect()->route('messages.index')->with('success', 'All your messages have been deleted successfully.');
     }
 }

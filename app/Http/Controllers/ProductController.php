@@ -69,7 +69,7 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
-        $product->load('images');
+        $product->load('user', 'category', 'images');
         $product->default_image = $product->getDefaultImage();
         return view('products.show', compact('product'));
     }

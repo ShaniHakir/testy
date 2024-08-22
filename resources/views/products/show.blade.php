@@ -33,6 +33,12 @@
             <p><strong>Price:</strong> ${{ number_format($product->price, 2) }}</p>
             <p><strong>Category:</strong> {{ $product->category->name }}</p>
             
+            @if($product->user)
+                <p><strong>Vendor:</strong> {{ $product->user->username }}</p>
+            @else
+                <p><strong>Vendor:</strong> Not assigned</p>
+            @endif
+            
             @if($product->discount_quantity && $product->discount_price)
                 <p><strong>Discount:</strong> Buy {{ $product->discount_quantity }} or more for ${{ number_format($product->discount_price, 2) }} each</p>
             @endif
@@ -40,17 +46,23 @@
             <p><strong>Description:</strong></p>
             <p>{{ $product->description }}</p>
             
-            @if(Auth::user()->can('update', $product))
-                <a href="{{ route('products.edit', $product) }}" class="btn btn-primary">Edit Product</a>
-            @endif
+            <div class="mt-4">
+                @if(Auth::check() && Auth::id() !== $product->user_id)
+                    <a href="{{ route('messages.create', ['recipient' => $product->user->username]) }}" class="btn btn-primary">Message Vendor</a>
+                @endif
 
-            @if(Auth::user()->can('delete', $product))
-                <form action="{{ route('products.destroy', $product) }}" method="POST" class="d-inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this product?')">Delete Product</button>
-                </form>
-            @endif
+                @if(Auth::user()->can('update', $product))
+                    <a href="{{ route('products.edit', $product) }}" class="btn btn-secondary">Edit Product</a>
+                @endif
+
+                @if(Auth::user()->can('delete', $product))
+                    <form action="{{ route('products.destroy', $product) }}" method="POST" class="d-inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this product?')">Delete Product</button>
+                    </form>
+                @endif
+            </div>
         </div>
     </div>
 </div>

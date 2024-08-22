@@ -84,12 +84,18 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/settings/pin', [SettingsController::class, 'updatePin'])->name('settings.pin.update');
     Route::put('/settings/jabber', [SettingsController::class, 'updateJabber'])->name('settings.jabber.update');
     Route::put('/settings/about', [SettingsController::class, 'updateAbout'])->name('settings.about.update');
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+
+    // Messaging Functions
     Route::get('/messages', [MessagesController::class, 'index'])->name('messages.index');
     Route::get('/messages/create', [MessagesController::class, 'create'])->name('messages.create');
     Route::get('/messages/{message}', [MessagesController::class, 'show'])->name('messages.show');
     Route::post('/messages', [MessagesController::class, 'store'])->name('messages.store');
     Route::delete('/messages/{message}', [MessagesController::class, 'destroy'])->name('messages.destroy');
     Route::delete('/messages', [MessagesController::class, 'deleteAll'])->name('messages.deleteAll');
+    Route::post('/messages/mark-all-read', [MessagesController::class, 'markAllAsRead'])->name('messages.markAllRead');
+
 
 
 });

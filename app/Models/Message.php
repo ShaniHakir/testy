@@ -17,4 +17,9 @@ class Message extends Model
     {
         return $this->belongsTo(User::class, 'recipient_id');
     }
+
+    public function scopeUnread($query)
+    {
+    return $query->where('read', false);
+    }
 }
