@@ -28,6 +28,9 @@
                         <a class="nav-link" href="{{ route('wallet.index') }}">Wallet (BTC: {{ auth()->user()->wallet->balance_btc ?? '0.00' }})</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{{ route('messages.index') }}">Messages</a>
+                    </li>
+                    <li class="nav-item">
                         <form action="{{ route('logout') }}" method="POST" class="d-inline">
                             @csrf
                             <button type="submit" class="btn btn-link nav-link">Logout</button>

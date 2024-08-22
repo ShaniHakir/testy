@@ -15,7 +15,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Middleware\VendorAdminMiddleware;
 use App\Models\ProductImage;
 use App\Http\Controllers\Admin\AdminUserController;
-
+use App\Http\Controllers\MessagesController;
 
 
 Route::group(['middleware' => ['auth', 'admin'], 'prefix' => 'admin', 'as' => 'admin.'], function () {
@@ -84,4 +84,12 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/settings/pin', [SettingsController::class, 'updatePin'])->name('settings.pin.update');
     Route::put('/settings/jabber', [SettingsController::class, 'updateJabber'])->name('settings.jabber.update');
     Route::put('/settings/about', [SettingsController::class, 'updateAbout'])->name('settings.about.update');
+    Route::get('/messages', [MessagesController::class, 'index'])->name('messages.index');
+    Route::get('/messages/create', [MessagesController::class, 'create'])->name('messages.create');
+    Route::get('/messages/{message}', [MessagesController::class, 'show'])->name('messages.show');
+    Route::post('/messages', [MessagesController::class, 'store'])->name('messages.store');
+    Route::delete('/messages/{message}', [MessagesController::class, 'destroy'])->name('messages.destroy');
+    Route::delete('/messages', [MessagesController::class, 'deleteAll'])->name('messages.deleteAll');
+
+
 });
