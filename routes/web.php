@@ -90,12 +90,13 @@ Route::middleware(['auth'])->group(function () {
     // Messaging Functions
     Route::get('/messages', [MessagesController::class, 'index'])->name('messages.index');
     Route::get('/messages/create', [MessagesController::class, 'create'])->name('messages.create');
-    Route::get('/messages/{message}', [MessagesController::class, 'show'])->name('messages.show');
+    Route::get('/messages/{conversation}', [MessagesController::class, 'show'])->name('messages.show');
     Route::post('/messages', [MessagesController::class, 'store'])->name('messages.store');
     Route::delete('/messages/{message}', [MessagesController::class, 'destroy'])->name('messages.destroy');
     Route::delete('/messages', [MessagesController::class, 'deleteAll'])->name('messages.deleteAll');
+    Route::delete('/conversations/{conversation}', [MessagesController::class, 'destroyConversation'])->name('conversations.destroy');
+    Route::delete('/conversations', [MessagesController::class, 'deleteAllConversations'])->name('conversations.deleteAll');
     Route::post('/messages/mark-all-read', [MessagesController::class, 'markAllAsRead'])->name('messages.markAllRead');
-
 
 
 });

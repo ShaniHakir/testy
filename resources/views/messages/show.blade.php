@@ -2,42 +2,49 @@
 
 @section('content')
 <div class="container mt-4">
+    <h1 class="mb-4">Conversation with {{ $otherUser->username }}</h1>
     <div class="card">
-        <div class="card-header bg-primary text-white">
-            <h2 class="mb-0">Message from {{ $message->sender->username }}</h2>
-            <small>Sent: {{ $message->created_at->format('M d, Y H:i') }}</small>
-            <span class="badge bg-light text-dark float-end">
-                {{ $message->read ? 'Read' : 'Unread' }}
-            </span>
-        </div>
         <div class="card-body">
-            <p class="card-text">{!! nl2br(e($message->content)) !!}</p>
-        </div>
-        <div class="card-footer">
-            <a href="{{ route('messages.index') }}" class="btn btn-secondary">Back to messages</a>
-            <form action="{{ route('messages.destroy', $message) }}" method="POST" class="d-inline float-end">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this message?')">Delete</button>
-            </form>
+            <div class="messages-container">
+                @foreach($messages as $message)
+                    <div class="message mb-3 p-3 {{ $message->sender_id === Auth::id() ? 'text-right bg-light' : 'text-left bg-white' }}" style="border: 1px solid #e0e0e0; border-radius: 10px;">
+                        <strong>{{ $message->sender->username }}:</strong>
+                        <p>{!! nl2br(e($message->content)) !!}</p>
+                        <small class="text-muted">{{ $message->created_at->format('M d, Y H:i') }}</small>
+                        @if($message->sender_id === Auth::id())
+                            <form action="{{ route('messages.destroy', $message) }}" method="POST" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-danger ml-2" onclick="return confirm('Are you sure you want to delete this message?')">Delete</button>
+                            </form>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
         </div>
     </div>
 
     <div class="card mt-4">
-        <div class="card-header bg-secondary text-white">
-            <h3 class="mb-0">Reply</h3>
-        </div>
         <div class="card-body">
             <form action="{{ route('messages.store') }}" method="POST">
                 @csrf
-                <input type="hidden" name="reply_to" value="{{ $message->id }}">
-                <div class="mb-3">
-                    <label for="content" class="form-label">Your Reply:</label>
-                    <textarea class="form-control" id="content" name="content" rows="4" placeholder="Type your reply here" required></textarea>
+                <input type="hidden" name="recipient" value="{{ $otherUser->username }}">
+                <div class="form-group">
+                    <label for="content">New Message:</label>
+                    <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">Send Reply</button>
+                <button type="submit" class="btn btn-primary mt-2">Send Message</button>
             </form>
         </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="{{ route('messages.index') }}" class="btn btn-secondary">Back to Conversations</a>
+        <form action="{{ route('messages.deleteAll') }}" method="POST" class="d-inline">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-danger ml-2" onclick="return confirm('Are you sure you want to delete all messages?')">Delete All Messages</button>
+        </form>
     </div>
 </div>
 @endsection

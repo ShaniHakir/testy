@@ -87,6 +87,12 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    public function conversations()
+    {
+        return $this->hasMany(Conversation::class, 'user1_id')
+            ->orWhere('user2_id', $this->id);
+    }
+
     public function sentMessages()
     {
         return $this->hasMany(Message::class, 'sender_id');
@@ -94,6 +100,14 @@ class User extends Authenticatable
 
     public function receivedMessages()
     {
-        return $this->hasMany(Message::class, 'recipient_id');
+        return Message::whereHas('conversation', function ($query) {
+            $query->where('user1_id', $this->id)
+                  ->orWhere('user2_id', $this->id);
+        })->where('sender_id', '!=', $this->id);
+    }
+
+    public function unreadMessages()
+    {
+        return $this->receivedMessages()->where('read', false);
     }
 }

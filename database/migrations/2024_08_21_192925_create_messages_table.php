@@ -4,31 +4,25 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class ModifyMessagesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up()
     {
-        Schema::create('messages', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('sender_id');
-            $table->unsignedBigInteger('recipient_id');
-            $table->text('content');
-            $table->boolean('read')->default(false);
-            $table->timestamps();
-    
-            $table->foreign('sender_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('recipient_id')->references('id')->on('users')->onDelete('cascade');
+        Schema::table('messages', function (Blueprint $table) {
+            $table->unsignedBigInteger('conversation_id')->after('id');
+            $table->foreign('conversation_id')->references('id')->on('conversations')->onDelete('cascade');
+            $table->dropForeign(['recipient_id']);
+            $table->dropColumn('recipient_id');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
-        Schema::dropIfExists('messages');
+        Schema::table('messages', function (Blueprint $table) {
+            $table->unsignedBigInteger('recipient_id')->after('sender_id');
+            $table->foreign('recipient_id')->references('id')->on('users')->onDelete('cascade');
+            $table->dropForeign(['conversation_id']);
+            $table->dropColumn('conversation_id');
+        });
     }
-};
+}

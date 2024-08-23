@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Message extends Model
 {
-    protected $fillable = ['sender_id', 'recipient_id', 'content', 'read'];
+    protected $fillable = ['conversation_id', 'sender_id', 'content', 'read'];
+
+    public function conversation()
+    {
+        return $this->belongsTo(Conversation::class);
+    }
 
     public function sender()
     {
@@ -15,11 +20,24 @@ class Message extends Model
 
     public function recipient()
     {
-        return $this->belongsTo(User::class, 'recipient_id');
+        return $this->conversation->participants()->where('users.id', '!=', $this->sender_id)->first();
     }
 
     public function scopeUnread($query)
     {
-    return $query->where('read', false);
+        return $query->where('read', false);
+    }
+
+    public static function unreadCountForUser($userId)
+    {
+        return static::whereHas('conversation', function ($query) use ($userId) {
+            $query->where(function ($q) use ($userId) {
+                $q->where('user1_id', $userId)
+                  ->orWhere('user2_id', $userId);
+            });
+        })
+        ->where('sender_id', '!=', $userId)
+        ->where('read', false)
+        ->count();
     }
 }
