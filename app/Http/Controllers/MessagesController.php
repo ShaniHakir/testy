@@ -7,6 +7,7 @@ use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class MessagesController extends Controller
 {
@@ -47,47 +48,56 @@ class MessagesController extends Controller
 
     public function store(Request $request)
     {
+        Log::info('Message store method called', $request->all());
+    
         $request->validate([
             'content' => 'required|string',
             'recipient' => 'required_without:conversation_id|exists:users,username',
             'conversation_id' => 'required_without:recipient|exists:conversations,id',
         ]);
-
-        if ($request->has('conversation_id')) {
-            // Replying to an existing conversation
-            $conversation = Conversation::findOrFail($request->conversation_id);
-            
-            if (!$conversation->hasParticipant(Auth::id())) {
-                abort(403, 'You do not have permission to send a message in this conversation.');
+    
+        try {
+            if ($request->has('conversation_id')) {
+                // Replying to an existing conversation
+                $conversation = Conversation::findOrFail($request->conversation_id);
+                
+                if (!$conversation->hasParticipant(Auth::id())) {
+                    throw new \Exception('You do not have permission to send a message in this conversation.');
+                }
+            } else {
+                // Starting a new conversation
+                $recipient = User::where('username', $request->recipient)->firstOrFail();
+                
+                if ($recipient->id === Auth::id()) {
+                    throw new \Exception('You cannot start a conversation with yourself.');
+                }
+    
+                $conversation = Conversation::firstOrCreate(
+                    [
+                        'user1_id' => min(Auth::id(), $recipient->id),
+                        'user2_id' => max(Auth::id(), $recipient->id),
+                    ],
+                    ['last_message_at' => now()]
+                );
             }
-        } else {
-            // Starting a new conversation
-            $recipient = User::where('username', $request->recipient)->firstOrFail();
-            
-            if ($recipient->id === Auth::id()) {
-                return redirect()->back()->with('error', 'You cannot start a conversation with yourself.');
-            }
-
-            $conversation = Conversation::firstOrCreate(
-                [
-                    'user1_id' => min(Auth::id(), $recipient->id),
-                    'user2_id' => max(Auth::id(), $recipient->id),
-                ],
-                ['last_message_at' => now()]
-            );
+    
+            $message = new Message([
+                'sender_id' => Auth::id(),
+                'content' => $request->content,
+                'read' => false,
+            ]);
+    
+            $conversation->messages()->save($message);
+            $conversation->update(['last_message_at' => now()]);
+    
+            Log::info('Message sent successfully', ['conversation_id' => $conversation->id]);
+    
+            return redirect()->route('messages.show', $conversation)
+                ->with('success', 'Message sent successfully.');
+        } catch (\Exception $e) {
+            Log::error('Error sending message: ' . $e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage())->withInput();
         }
-
-        $message = new Message([
-            'sender_id' => Auth::id(),
-            'content' => $request->content,
-            'read' => false,
-        ]);
-
-        $conversation->messages()->save($message);
-        $conversation->update(['last_message_at' => now()]);
-
-        return redirect()->route('messages.show', $conversation)
-            ->with('success', 'Message sent successfully.');
     }
 
     public function destroy(Message $message)
