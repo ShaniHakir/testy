@@ -30,7 +30,10 @@
         </div>
         
         <div class="col-md-6">
-            <p><strong>Price:</strong> ${{ number_format($product->price, 2) }}</p>
+            <p><strong>Price:</strong> ${{ number_format($product->getCurrentPriceInUsd(), 2) }}</p>
+            @if($product->shouldApplyDiscount())
+                <p class="text-success">Discount applied!</p>
+            @endif
             <p><strong>Category:</strong> {{ $product->category->name }}</p>
             
             @if($product->user)
@@ -40,7 +43,7 @@
             @endif
             
             @if($product->discount_quantity && $product->discount_price)
-                <p><strong>Discount:</strong> Buy {{ $product->discount_quantity }} or more for ${{ number_format($product->discount_price, 2) }} each</p>
+                <p><strong>Discount:</strong> Buy {{ $product->discount_quantity }} or more for ${{ number_format($product->getDiscountPriceInUsd(), 2) }} each</p>
             @endif
             
             <p><strong>Description:</strong></p>
@@ -62,6 +65,15 @@
                         <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this product?')">Delete Product</button>
                     </form>
                 @endif
+
+                <form action="{{ route('cart.add', ['product' => $product->id]) }}" method="POST" class="mt-3">
+                    @csrf
+                    <div class="form-group">
+                        <label for="quantity">Quantity:</label>
+                        <input type="number" name="quantity" id="quantity" value="1" min="1" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-success">Add to Cart</button>
+                </form>
             </div>
         </div>
     </div>

@@ -22,6 +22,9 @@
         <li class="nav-item">
             <a class="nav-link" href="{{ route('settings.about') }}">About</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('orders.index') }}">Orders</a>
+        </li>
         @if ($isVendorOrAdmin)
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('products.index') }}">Manage Products</a>

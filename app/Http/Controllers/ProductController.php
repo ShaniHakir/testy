@@ -67,22 +67,26 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'Product created successfully.');
     }
 
-    public function show(Product $product)
+    public function show($id)
     {
+        $product = Product::findOrFail($id);
         $product->load('user', 'category', 'images');
         $product->default_image = $product->getDefaultImage();
         return view('products.show', compact('product'));
     }
 
-    public function edit(Product $product)
+    public function edit($id)
     {
+        $product = Product::findOrFail($id);
         $this->authorize('update', $product);
         $categories = Category::pluck('name', 'id');
         return view('products.edit', compact('product', 'categories'));
     }
 
-    public function setDefaultImage(Request $request, Product $product, ProductImage $image)
+    public function setDefaultImage(Request $request, $product_id, $image_id)
     {
+        $product = Product::findOrFail($product_id);
+        $image = ProductImage::findOrFail($image_id);
         $this->authorize('update', $product);
 
         try {
@@ -91,9 +95,9 @@ class ProductController extends Controller
                 $image->update(['is_default' => true]);
             });
 
-            return redirect()->route('products.edit', $product)->with('success', 'Default image updated successfully.');
+            return redirect()->route('products.edit', $product->id)->with('success', 'Default image updated successfully.');
         } catch (\Exception $e) {
-            return redirect()->route('products.edit', $product)->with('error', 'Failed to update default image. Please try again.');
+            return redirect()->route('products.edit', $product->id)->with('error', 'Failed to update default image. Please try again.');
         }
     }
 
@@ -113,8 +117,9 @@ class ProductController extends Controller
         return back()->with('success', 'Image deleted successfully.');
     }
 
-    public function update(Request $request, Product $product)
+    public function update(Request $request, $id)
     {
+        $product = Product::findOrFail($id);
         $this->authorize('update', $product);
 
         $validatedData = $request->validate([
@@ -139,8 +144,9 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'Product updated successfully.');
     }
 
-    public function destroy(Product $product)
+    public function destroy($id)
     {
+        $product = Product::findOrFail($id);
         $this->authorize('delete', $product);
         $product->delete();
         return redirect()->route('products.index')->with('success', 'Product deleted successfully.');

@@ -20,7 +20,12 @@
                     @endif
                     <div class="card-body">
                         <h5 class="card-title">{{ $product->name }}</h5>
-                        <p class="card-text">${{ number_format($product->price, 2) }}</p>
+                        <p class="card-text">
+                            ${{ number_format($product->getCurrentPriceInUsd(), 2) }}
+                            @if($product->shouldApplyDiscount())
+                                <span class="text-success">(Discounted)</span>
+                            @endif
+                        </p>
                         <p class="card-text">{{ $product->category->name }}</p>
                         <a href="{{ route('products.show', $product) }}" class="btn btn-sm btn-info">View</a>
                         @if(Auth::user()->can('update', $product))
