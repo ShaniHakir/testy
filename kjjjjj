@@ -172,31 +172,30 @@ class OrderController extends Controller
             $totalVendorAmount = 0;
     
             foreach ($orderItems as $item) {
-                $singleItemPriceUsd = $item->price_usd / $item->quantity;
-                $singleItemPriceBtc = $this->currencyConversionService->convertUsdToBtc($singleItemPriceUsd);
-                $totalItemAmountBtc = $singleItemPriceBtc * $item->quantity;
-                $exchangeRate = $singleItemPriceUsd / $singleItemPriceBtc;
+                $itemPriceBtc = $this->currencyConversionService->convertUsdToBtc($item->price_usd);
+                $totalItemAmountBtc = $itemPriceBtc * $item->quantity;
+                $exchangeRate = $item->price_usd / $itemPriceBtc;
 
                 \Log::info("Processing order item", [
                     'item_id' => $item->id,
-                    'single_item_price_usd' => $singleItemPriceUsd,
-                    'single_item_price_btc' => $singleItemPriceBtc,
+                    'price_usd' => $item->price_usd,
+                    'price_btc' => $itemPriceBtc,
                     'exchange_rate' => $exchangeRate,
                     'quantity' => $item->quantity,
                     'total_item_amount_btc' => $totalItemAmountBtc
                 ]);
     
-                if ($singleItemPriceBtc <= 0 || $item->quantity <= 0) {
+                if ($itemPriceBtc <= 0 || $item->quantity <= 0) {
                     \Log::warning("Invalid price or quantity for order item", [
                         'item_id' => $item->id,
-                        'single_item_price_btc' => $singleItemPriceBtc,
+                        'price_btc' => $itemPriceBtc,
                         'quantity' => $item->quantity
                     ]);
                     continue;
                 }
     
                 $item->status = 'delivered';
-                $item->price_btc = $singleItemPriceBtc;
+                $item->price_btc = $itemPriceBtc;
                 $item->save();
     
                 $marketplaceFee = $totalItemAmountBtc * $marketplaceFeePercentage;

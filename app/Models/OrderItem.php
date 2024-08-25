@@ -19,12 +19,22 @@ class OrderItem extends Model
         'status',
     ];
 
-
     protected $casts = [
-        'price' => 'decimal:8',
+        'price_usd' => 'decimal:2',
+        'price_btc' => 'decimal:8',
         'quantity' => 'integer',
         'status' => 'string'
     ];
+
+    public function setPriceUsdAttribute($value)
+    {
+        $this->attributes['price_usd'] = $value ?? 0;
+    }
+
+    public function setPriceBtcAttribute($value)
+    {
+        $this->attributes['price_btc'] = $value ?? 0;
+    }
 
     public function order()
     {

@@ -37,7 +37,7 @@ class ProductController extends Controller
     {
         \Log::info('Product store method called');
         \Log::info('Request data:', $request->all());
-
+    
         $validatedData = $request->validate([
             'name' => 'required|max:255',
             'description' => 'required',
@@ -45,24 +45,23 @@ class ProductController extends Controller
             'discount_quantity' => 'nullable|integer|min:1',
             'discount_price' => 'nullable|numeric|min:0',
             'category_id' => 'required|exists:categories,id',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'stock' => 'required_without:unlimited_stock|nullable|integer|min:0',
+            'unlimited_stock' => 'nullable|boolean',
         ]);
-
+    
         $product = new Product($validatedData);
         $product->user_id = Auth::id();
+    
+        if ($request->has('unlimited_stock')) {
+            $product->stock = null; // Use null to represent unlimited stock
+        } else {
+            $product->stock = $validatedData['stock'];
+        }
+    
         $product->save();
     
-        if ($request->hasFile('images')) {
-            \Log::info('Images found in request');
-            foreach ($request->file('images') as $image) {
-                \Log::info('Processing image: ' . $image->getClientOriginalName());
-                $path = $image->store('product_images', 'public');
-                \Log::info('Image stored at: ' . $path);
-                $product->images()->create(['path' => $path]);
-            }
-        } else {
-            \Log::info('No images found in request');
-        }
+        // ... rest of the method (image handling, etc.)
     
         return redirect()->route('products.index')->with('success', 'Product created successfully.');
     }
@@ -116,12 +115,11 @@ class ProductController extends Controller
 
         return back()->with('success', 'Image deleted successfully.');
     }
-
     public function update(Request $request, $id)
     {
         $product = Product::findOrFail($id);
         $this->authorize('update', $product);
-
+    
         $validatedData = $request->validate([
             'name' => 'required|max:255',
             'description' => 'required',
@@ -129,18 +127,24 @@ class ProductController extends Controller
             'discount_quantity' => 'nullable|integer|min:1',
             'discount_price' => 'nullable|numeric|min:0',
             'category_id' => 'required|exists:categories,id',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'stock' => 'required_without:unlimited_stock|nullable|integer|min:0',
+            'unlimited_stock' => 'nullable|boolean',
         ]);
-
+    
+        if ($request->has('unlimited_stock')) {
+            $validatedData['stock'] = null; // Use null to represent unlimited stock
+        }
+    
         $product->update($validatedData);
-
+    
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 $path = $image->store('product_images', 'public');
                 $product->images()->create(['path' => $path]);
             }
         }
-
+    
         return redirect()->route('products.index')->with('success', 'Product updated successfully.');
     }
 

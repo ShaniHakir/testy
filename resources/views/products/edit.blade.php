@@ -62,6 +62,22 @@
         </div>
         
         <div class="form-group">
+            <label>Stock</label>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="unlimited_stock" name="unlimited_stock" value="1" {{ old('unlimited_stock', $product->stock === null) ? 'checked' : '' }}>
+                <label class="form-check-label" for="unlimited_stock">
+                    Unlimited Stock
+                </label>
+            </div>
+            <div id="stock_input" style="{{ old('unlimited_stock', $product->stock === null) ? 'display: none;' : '' }}">
+                <input type="number" class="form-control @error('stock') is-invalid @enderror" id="stock" name="stock" value="{{ old('stock', $product->stock) }}" min="0">
+                @error('stock')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+        </div>
+        
+        <div class="form-group">
             <label for="images">Add More Images</label>
             <input type="file" class="form-control-file @error('images') is-invalid @enderror" id="images" name="images[]" multiple accept="image/*">
             @error('images')
@@ -70,7 +86,7 @@
         </div>
         
         <button type="submit" class="btn btn-primary">Update Product</button>
-        </form>
+    </form>
 
     @if($product->images->count() > 0)
     <div class="mt-4">
@@ -102,4 +118,22 @@
     </div>
     @endif
 </div>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const unlimitedStockCheckbox = document.getElementById('unlimited_stock');
+        const stockInput = document.getElementById('stock_input');
+
+        unlimitedStockCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                stockInput.style.display = 'none';
+            } else {
+                stockInput.style.display = 'block';
+            }
+        });
+    });
+</script>
+@endpush
+
 @endsection
