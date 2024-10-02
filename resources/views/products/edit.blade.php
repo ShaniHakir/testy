@@ -97,12 +97,12 @@
                     <img src="{{ Storage::url($image->path) }}" alt="Product Image" class="img-thumbnail">
                     <div class="mt-2">
                         @can('update', $product)
-                            <form action="{{ route('products.images.setDefault', ['product' => $product->id, 'image' => $image->id]) }}" method="POST" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn btn-sm btn-primary" {{ $image->is_default ? 'disabled' : '' }}>
-                                    {{ $image->is_default ? 'Default' : 'Set as Default' }}
-                                </button>
-                            </form>
+                        <form action="{{ route('products.images.setDefault', ['product_id' => $product->id, 'image_id' => $image->id]) }}" method="POST" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-primary" {{ $image->is_default ? 'disabled' : '' }}>
+                                {{ $image->is_default ? 'Default' : 'Set as Default' }}
+                            </button>
+                        </form>
                         @endcan
                         @can('deleteImage', $product)
                             <form action="{{ route('products.images.delete', $image->id) }}" method="POST" class="d-inline">
