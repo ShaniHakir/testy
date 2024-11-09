@@ -69,8 +69,10 @@ Route::middleware(['auth', 'vendor.admin'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    // Wallets
+    // Wallet Routes
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
+    Route::post('/wallet/withdraw', [WalletController::class, 'withdraw'])->name('wallet.withdraw');
+    Route::post('/wallet/deposit-address', [WalletController::class, 'getDepositAddress'])->name('wallet.deposit-address');
 
     // Vendor upgrade routes
     Route::get('/settings/confirm-vendor-upgrade', [VendorController::class, 'showUpgradeConfirmation'])->name('vendor.upgrade');

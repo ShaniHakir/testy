@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Wallet;  // Ensure you import the Wallet model
+use App\Models\MoneroTransaction;
 
 class User extends Authenticatable
 {
@@ -24,7 +24,7 @@ class User extends Authenticatable
         'role',
         'about',
         'is_banned',
-
+        'balance',
     ];
 
     /**
@@ -44,6 +44,8 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'balance' => 'decimal:12',
+        'is_banned' => 'boolean',
     ];
 
     /**
@@ -55,16 +57,6 @@ class User extends Authenticatable
     public function setPasswordAttribute($value)
     {
         $this->attributes['password'] = \Hash::make($value);
-    }
-
-    /**
-     * Get the wallet associated with the user.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
-     */
-    public function wallet()
-    {
-        return $this->hasOne(Wallet::class);
     }
 
     /**
@@ -113,10 +105,64 @@ class User extends Authenticatable
 
     public function cart()
     {
-    return $this->hasOne(Cart::class);
+        return $this->hasOne(Cart::class);
     }
+
     public function orders()
     {
-    return $this->hasMany(Order::class);
+        return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Get the Monero transactions associated with the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function moneroTransactions()
+    {
+        return $this->hasMany(MoneroTransaction::class);
+    }
+
+    /**
+     * Check if user has sufficient balance
+     */
+    public function hasSufficientBalance(float $amount): bool
+    {
+        return bccomp($this->balance, $amount, 12) >= 0;
+    }
+
+    /**
+     * Get confirmed deposits
+     */
+    public function getConfirmedDeposits()
+    {
+        return $this->moneroTransactions()
+            ->where('type', 'deposit')
+            ->where('is_confirmed', true)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Get pending deposits
+     */
+    public function getPendingDeposits()
+    {
+        return $this->moneroTransactions()
+            ->where('type', 'deposit')
+            ->where('is_confirmed', false)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Get withdrawals
+     */
+    public function getWithdrawals()
+    {
+        return $this->moneroTransactions()
+            ->where('type', 'withdrawal')
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 }
