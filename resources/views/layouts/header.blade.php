@@ -28,7 +28,9 @@
                         <a class="nav-link" href="{{ route('settings') }}">Settings</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('wallet.index') }}">Wallet (BTC: {{ auth()->user()->wallet->balance_btc ?? '0.00' }})</a>
+                        <a class="nav-link" href="{{ route('wallet.index') }}">
+                            Wallet (XMR: {{ $xmrBalance }} ≈ ${{ number_format($usdBalance, 2) }})
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link position-relative" href="{{ route('messages.index') }}">

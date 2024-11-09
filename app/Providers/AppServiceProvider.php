@@ -4,8 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
+use App\Services\CurrencyConversionService;
 use Illuminate\Support\Facades\Auth;
-use App\Services\CurrencyConversionService; 
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,9 +14,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(CurrencyConversionService::class, function ($app) {
-            return new CurrencyConversionService();
-        });
+        //
     }
 
     /**
@@ -26,8 +24,37 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer('*', function ($view) {
             if (Auth::check()) {
-                $unreadMessagesCount = Auth::user()->receivedMessages()->unread()->count();
-                $view->with('unreadMessagesCount', $unreadMessagesCount);
+                $user = Auth::user();
+                $wallet = $user->moneroWallet;
+                $unreadMessagesCount = $user->unreadMessages()->count();
+
+                if ($wallet) {
+                    // Calculate balance from confirmed transactions
+                    $incoming = $wallet->transactions()
+                        ->where('type', 'incoming')
+                        ->where('is_confirmed', true)
+                        ->sum('amount');
+                    
+                    $outgoing = $wallet->transactions()
+                        ->where('type', 'outgoing')
+                        ->where('is_confirmed', true)
+                        ->sum('amount');
+                    
+                    $xmrBalance = bcsub($incoming, $outgoing, 12);
+                    
+                    // Get USD equivalent
+                    $currencyService = app(CurrencyConversionService::class);
+                    $usdBalance = $currencyService->convertXmrToUsd($xmrBalance);
+                } else {
+                    $xmrBalance = '0.000000000000';
+                    $usdBalance = 0;
+                }
+
+                $view->with([
+                    'xmrBalance' => $xmrBalance,
+                    'usdBalance' => $usdBalance,
+                    'unreadMessagesCount' => $unreadMessagesCount
+                ]);
             }
         });
     }
